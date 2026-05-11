@@ -15,7 +15,6 @@ class Grid {
      */
     constructor(rows, cols) {
         this.#rows = rows;
-
         this.#grid = Array.from({ length: rows * cols });
     }
 
@@ -45,13 +44,26 @@ class Grid {
      * @returns the value of the grid tile
      */
     getGridTileValue(index) {
+        // this.#validateIndex(index);
         return this.#grid[index];
     }
 
+    /**
+     * It get the neighbours index of a grid tile
+     * 
+     * @param {Number} index the index of the grid tile
+     * @returns an array of neighours index
+     */
     getNeighboursIndex(index) {
         return this.#getNeighbours(index);
     }
 
+    /**
+     * It get the neighbours value of an array of neighbours index
+     * 
+     * @param {Array} neighboursIndex the neighbours index
+     * @returns an array with the values of each neighbour
+     */
     getNeighboursTiles(neighboursIndex) {
         return neighboursIndex.map((neighbourIndex) =>
             this.getGridTileValue(neighbourIndex)
@@ -76,15 +88,23 @@ class Grid {
     }
 
     /**
+     * it cheks if the index is within the array limits
+     * 
+     * @param {Number} index the grid tile index
+     * @returns true if the index is a valid index
+     */
+    validIndex(index) {
+        return (index >= 0 && index < this.#grid.length);
+    }
+
+    /**
      * Validate if the index is beetwen the array limits
+     * This function is meant to be use 
+     * in the setters and getters
      * 
      * @param {Number} index 
      */
     #validateIndex(index) {
         if (!this.validIndex(index)) { throw new RangeError("cannot acces grid value") }
-    }
-
-    validIndex(index) {
-        return (index > 0 && index < this.#grid.length);
     }
 }

@@ -43,7 +43,7 @@ class WaveFunctionCollapse {
      */
     #getGridTileIndex() {
         let gridTileIndex = this.#entropy.getLowestEntropyGridTileIndex();
-        if (!gridTileIndex) { gridTileIndex = this.#grid.randomGridTileIndex }
+        if (gridTileIndex == undefined) { gridTileIndex = this.#grid.randomGridTileIndex }
 
         return gridTileIndex;
     }
@@ -94,19 +94,40 @@ class WaveFunctionCollapse {
     }
 
 
-    getToDisplayTiles() {
-        let toDisplayTiles = [];
+    display(displayGridTilesIndex, displayEntropyGridTile, res) {
+        textSize(20);
+        fill(200);
 
         for (let i = 0; i < this.#collapsedGridTilesIndex.length; i++) {
             let gridTileIndex = this.#collapsedGridTilesIndex[i];
             let tileIndex = this.#grid.getGridTileValue(gridTileIndex);
+            let tileImg = this.#tiles.tilesObj[tileIndex];
 
-            toDisplayTiles.push({
-                "gridTileIndex": gridTileIndex,
-                "tileIndex": tileIndex
-            });
+            let x = gridTileIndex % cols;
+            let y = Math.floor(gridTileIndex / cols);
+
+            image(tileImg, x * res, y * res, res, res);
+            if (displayGridTilesIndex) {
+                text(str(gridTileIndex), x * res + res / 2, y * res + res / 2, res, res);
+            }
         }
 
-        return toDisplayTiles;
+        let entropyGridTileIndexList = [];
+        if (displayEntropyGridTile) { entropyGridTileIndexList = this.#entropy.entropyList }
+
+        for (let i = 0; i < entropyGridTileIndexList.length; i++) {
+            let entropyGridTileIndexSubList = entropyGridTileIndexList[i];
+            if (entropyGridTileIndexSubList.length == 0) { continue }
+
+            for (let j = 0; j < entropyGridTileIndexSubList.length; j++) {
+                let entropyGridTileIndex = entropyGridTileIndexSubList[j];
+                let entropy = i;
+
+                let x = entropyGridTileIndex % cols;
+                let y = Math.floor(entropyGridTileIndex / cols);
+
+                text(str(entropy + 2), x * res + res / 2, y * res + res / 2, res, res);
+            }
+        }
     }
 }

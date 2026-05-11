@@ -8,8 +8,8 @@ class Tiles {
     /**
      * The tiles class creates 3 main arrays,
      * the tiles object, tileObj, wich contains the image for each tile
-     * the tiles sides, tilesSide, wich containd the sides for each tile and
-     * the tiles rule book, tilesRuleBook, wich contains the compatible neigbour 
+     * the tiles sides, tilesSide, wich contains the sides for each tile and
+     * the tiles rule book, tilesRuleBook, wich contains the compatible neighbours
      * for each side of each tile
      * 
      * @param {String} tilesPath the path where the tiles images are 
@@ -21,7 +21,7 @@ class Tiles {
         this.#tilesObj = [
             loadImage(tilesPath + "T_EMPTY.jpg"),     //tileEmpty
             loadImage(tilesPath + "T0_SIDE.jpg"),     //tile0Side
-            loadImage(tilesPath + "T0_UP.jpg"),     //tile0Up
+            loadImage(tilesPath + "T0_UP.jpg"),       //tile0Up
             loadImage(tilesPath + "T1_DOWN.jpg"),     //tile1Down
             loadImage(tilesPath + "T1_LEFT.jpg"),     //tile1Left
             loadImage(tilesPath + "T1_RIGHT.jpg"),    //tile1Right
@@ -61,10 +61,6 @@ class Tiles {
 
     get tilesObj() {
         return this.#tilesObj;
-    }
-
-    get tilesSides() {
-        return this.#tilesSides;
     }
 
     get tilesLenght() {
@@ -116,8 +112,8 @@ class Tiles {
         let tileSide = this.#tilesSides[tileIndex][sideIndex];
 
         for (let i = 0; i < this.#len; i++) {
-            let secondSideIndex = (sideIndex + 2) % this.#tilesSides[tileIndex].length;
-            let secondTileSide = this.#tilesSides[i][secondSideIndex];
+            let opositeSideIndex = this.#getOpositeSideIndex(sideIndex);
+            let secondTileSide = this.#tilesSides[i][opositeSideIndex];
 
             if (tileSide == secondTileSide) { list.push(i) }
         }
@@ -131,8 +127,20 @@ class Tiles {
     }
 
     /**
+     * So because the tiles are the neigbhour tiles 
+     * of the grid tile, if you have the up tile
+     * you need to check for it down side rule book
+     * 
+     * @param {Number} side a side of a tile
+     * @returns the oposite side index if that tile
+     */
+    #getOpositeSideIndex(side) {
+        return (side + 2) % this.#tilesSides[0].length;
+    }
+
+    /**
      * This calclute the posble tiles a grid tile can be collapsed in
-     * according to its neighbours tile, in the tiles index array
+     * according to its neighbours tiles, in the tiles index array
      * Also the tiles index array indicates wich neigbhour
      * is to each side
      * Up, Right, Down, Left
@@ -146,11 +154,11 @@ class Tiles {
         let filterTilesRuleBook = this.#getFilterTilesRuleBook(tilesRuleBook);
         let posibleTiles = this.#getIntersectionOfArrays(filterTilesRuleBook);
 
-        // console.log(tilesIndex, tilesRuleBook, filterTilesRuleBook, posibleTiles)
         return posibleTiles;
     }
 
     /**
+     * This function check if a grid tile have no collapsed neighbours
      * 
      * @param {Array} tilesIndex the tiles index
      * @returns true if none of the tiles are collapsed
@@ -163,8 +171,8 @@ class Tiles {
      * This function get an array of tiles index
      * and map it to its rule book 
      * 
-     * Ej. tile index [0, 4, undefinde, 1]
-     *     tiles rule book [[0, 1], [2, 4, 5], undefind, [1]]
+     * Ej. tile index [0, 4, undefined, 1]
+     *     tiles rule book [[0, 1], [2, 4, 5], undefined, [1]]
      * 
      * @param {Array} tiles an array of tiles index
      * @returns an array with rule books
@@ -176,10 +184,10 @@ class Tiles {
             let tileIndex = tilesIndex[i];
             if (tileIndex == undefined) { continue }    // a tile can be not collapsed yet 
 
-            let side = i;
-            let opositeSide = this.#getOpositeSide(side);
+            let sideIndex = i;
+            let opositeSideIndex = this.#getOpositeSideIndex(sideIndex);
 
-            let tileSideRuleBookindex = this.#getRuleBook(tileIndex, opositeSide);
+            let tileSideRuleBookindex = this.#getRuleBook(tileIndex, opositeSideIndex);
 
             tilesRuleBook[i] = tileSideRuleBookindex;
         }
@@ -235,18 +243,6 @@ class Tiles {
         }
 
         return filterArray;
-    }
-
-    /**
-     * So because the tiles are the neigbhour tiles 
-     * of the grid tile, if you have the up tile
-     * you need to check for it down side rule book
-     * 
-     * @param {Number} side a side of a tile
-     * @returns the oposite side if that tile
-     */
-    #getOpositeSide(side) {
-        return (side + 2) % this.#tilesSides[0].length;
     }
 
     /**
