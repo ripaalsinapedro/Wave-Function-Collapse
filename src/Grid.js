@@ -44,7 +44,6 @@ class Grid {
      * @returns the value of the grid tile
      */
     getGridTileValue(index) {
-        // this.#validateIndex(index);
         return this.#grid[index];
     }
 

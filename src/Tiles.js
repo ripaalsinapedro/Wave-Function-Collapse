@@ -90,6 +90,8 @@ class Tiles {
 
             for (let j = 0; j < tileSides.length; j++) {
                 let compatibleList = this.#createCompatibleList(i, j);
+                this.#validateCompatibleList(compatibleList);
+
                 ruleBook.push(compatibleList);
             }
         }
@@ -124,6 +126,12 @@ class Tiles {
     #validateIndex(tileIndex, sideIndex) {
         if (tileIndex > this.#len) { throw new RangeError("The tile index is not valid") }
         if (sideIndex > this.#tilesSides[tileIndex].length) { throw new RangeError("The side index is not valid") }
+    }
+
+    #validateCompatibleList(compatibleList) {
+        if (compatibleList.length == 0) {
+            throw new Error("a tile cant have no posible tiles to be neighbour with")
+        }
     }
 
     /**

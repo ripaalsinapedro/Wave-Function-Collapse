@@ -1,26 +1,20 @@
-let WFC;
-
 const canvasSize = 800;
 const rows = 10;
 const cols = 10;
-const res = canvasSize / rows;
+const resX = canvasSize / rows;
+const resY = canvasSize / cols;
 
-let tiles;
-let tilesImg;
-
-function preload() {
-  tiles = new Tiles("assets/tiles/");
-  tilesImg = tiles.tilesObj;
-}
+let WFC;
 
 function setup() {
   createCanvas(canvasSize, canvasSize);
+  const tiles = new Tiles("assets/tiles/");
   WFC = new WaveFunctionCollapse(rows, cols, tiles);
 }
 
 function draw() {
   background(50);
-  WFC.display(true, true, res);
+  WFC.display(true, true, resX, resY);
 
   if (WFC.notFilled()) {
     WFC.collapse();

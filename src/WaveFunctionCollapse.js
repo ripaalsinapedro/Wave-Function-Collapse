@@ -18,10 +18,6 @@ class WaveFunctionCollapse {
         this.#collapsedGridTilesIndex = new Array();
     }
 
-    get el() {
-        return this.#entropy.el;
-    }
-
     collapse() {
         let gridTileIndex = this.#getGridTileIndex();
         let gridTileNeighboursIndex = this.#grid.getNeighboursIndex(gridTileIndex);
@@ -94,8 +90,8 @@ class WaveFunctionCollapse {
     }
 
 
-    display(displayGridTilesIndex, displayEntropyGridTile, res) {
-        textSize(20);
+    display(displayGridTilesIndex, displayEntropyGridTile, resX, resY) {
+        textSize((resX + resY) / 10);
         fill(200);
 
         for (let i = 0; i < this.#collapsedGridTilesIndex.length; i++) {
@@ -103,12 +99,12 @@ class WaveFunctionCollapse {
             let tileIndex = this.#grid.getGridTileValue(gridTileIndex);
             let tileImg = this.#tiles.tilesObj[tileIndex];
 
-            let x = gridTileIndex % cols;
-            let y = Math.floor(gridTileIndex / cols);
+            let x = gridTileIndex % rows;
+            let y = Math.floor(gridTileIndex / rows);
 
-            image(tileImg, x * res, y * res, res, res);
+            image(tileImg, x * resX, y * resY, resX, resY);
             if (displayGridTilesIndex) {
-                text(str(gridTileIndex), x * res + res / 2, y * res + res / 2, res, res);
+                text(str(gridTileIndex), x * resX + resX / 2, y * resY + resY / 2, resX, resY);
             }
         }
 
@@ -123,10 +119,10 @@ class WaveFunctionCollapse {
                 let entropyGridTileIndex = entropyGridTileIndexSubList[j];
                 let entropy = i;
 
-                let x = entropyGridTileIndex % cols;
-                let y = Math.floor(entropyGridTileIndex / cols);
+                let x = entropyGridTileIndex % rows;
+                let y = Math.floor(entropyGridTileIndex / rows);
 
-                text(str(entropy + 2), x * res + res / 2, y * res + res / 2, res, res);
+                text(str(entropy + 2), x * resX + resX / 2, y * resY + resY / 2, resX, resY);
             }
         }
     }
