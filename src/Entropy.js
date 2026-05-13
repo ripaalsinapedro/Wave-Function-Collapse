@@ -1,8 +1,10 @@
 class Entropy {
     #entropysList;
+    #maxEntropy;
 
     constructor(maxEntropy) {
-        this.#entropysList = Array.from({ length: maxEntropy - 1 }, () => []);
+        this.#maxEntropy = maxEntropy;
+        this.createNewEntropyList();
     }
 
     get entropyList() {
@@ -75,5 +77,9 @@ class Entropy {
 
     #removeFromEntropyList(entropyList, entropyListIndex) {
         entropyList.splice(entropyListIndex, 1);
+    }
+
+    createNewEntropyList() {
+        this.#entropysList = Array.from({ length: this.#maxEntropy - 1 }, () => []);
     }
 }

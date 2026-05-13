@@ -1,9 +1,11 @@
-html, body {
+html,
+body {
   margin: 0;
   padding: 0;
-  background-color: black;
+  background-color: rgb(29, 29, 29);
 }
 
 canvas {
   display: block;
+  padding: 1%;
 }

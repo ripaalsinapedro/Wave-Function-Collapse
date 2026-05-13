@@ -1,5 +1,6 @@
 class Grid {
     #rows;
+    #cols;
     #grid;
 
     /**
@@ -15,7 +16,8 @@ class Grid {
      */
     constructor(rows, cols) {
         this.#rows = rows;
-        this.#grid = Array.from({ length: rows * cols });
+        this.#cols = cols;
+        this.createNewGrid(rows, cols);
     }
 
     get length() {
@@ -24,6 +26,14 @@ class Grid {
 
     get randomGridTileIndex() {
         return int(random(this.#grid.length));
+    }
+
+    get rows() {
+        return this.#rows;
+    }
+
+    get cols() {
+        return this.#cols;
     }
 
     /**
@@ -105,5 +115,12 @@ class Grid {
      */
     #validateIndex(index) {
         if (!this.validIndex(index)) { throw new RangeError("cannot acces grid value") }
+    }
+
+    createNewGrid(newRows, newCols) {
+        this.#rows = newRows;
+        this.#cols = newCols;
+
+        this.#grid = Array.from({ length: newRows * newCols });
     }
 }

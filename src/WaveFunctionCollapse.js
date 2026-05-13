@@ -89,8 +89,17 @@ class WaveFunctionCollapse {
         return this.#collapsedGridTilesIndex.length < this.#grid.length;
     }
 
+    reset(newRows, newCols) {
+        this.#collapsedGridTilesIndex = new Array();
+        this.#entropy.createNewEntropyList();
+        this.#grid.createNewGrid(newRows, newCols);
+    }
 
-    display(displayGridTilesIndex, displayEntropyGridTile, resX, resY) {
+
+    display(displayGridTilesIndex, displayEntropyGridTile) {
+        const resX = canvasSize / this.#grid.rows;
+        const resY = canvasSize / this.#grid.cols;
+
         textSize((resX + resY) / 10);
         fill(200);
 
@@ -99,8 +108,8 @@ class WaveFunctionCollapse {
             let tileIndex = this.#grid.getGridTileValue(gridTileIndex);
             let tileImg = this.#tiles.tilesObj[tileIndex];
 
-            let x = gridTileIndex % rows;
-            let y = Math.floor(gridTileIndex / rows);
+            let x = gridTileIndex % this.#grid.rows;
+            let y = Math.floor(gridTileIndex / this.#grid.rows);
 
             image(tileImg, x * resX, y * resY, resX, resY);
             if (displayGridTilesIndex) {
@@ -119,8 +128,8 @@ class WaveFunctionCollapse {
                 let entropyGridTileIndex = entropyGridTileIndexSubList[j];
                 let entropy = i;
 
-                let x = entropyGridTileIndex % rows;
-                let y = Math.floor(entropyGridTileIndex / rows);
+                let x = entropyGridTileIndex % this.#grid.rows;
+                let y = Math.floor(entropyGridTileIndex / this.#grid.rows);
 
                 text(str(entropy + 2), x * resX + resX / 2, y * resY + resY / 2, resX, resY);
             }
