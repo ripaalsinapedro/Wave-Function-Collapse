@@ -4,11 +4,7 @@ class Entropy {
 
     constructor(maxEntropy) {
         this.#maxEntropy = maxEntropy;
-        this.createNewEntropyList();
-    }
-
-    get entropyList() {
-        return this.#entropysList;
+        this.createEntropyList();
     }
 
     /**
@@ -45,10 +41,10 @@ class Entropy {
     * @param {Number} gridTileEntropy the grid tile entropy
     */
     updateGridTileEntropy(gridTileIndex, gridTileEntropy) {
-        let getCheck = this.#check(gridTileIndex);
-        if (getCheck.length) {
-            let entropyList = getCheck[0];
-            let entropyListIndex = getCheck[1];
+        let getGridTileEntropy = this.getGridTileEntropy(gridTileIndex);
+        if (getGridTileEntropy.length) {
+            let entropyList = getGridTileEntropy[0];
+            let entropyListIndex = getGridTileEntropy[1];
 
             // because the entropy from a grid tile cant go down
             // we can asume the new grid tile entropy is lower
@@ -56,11 +52,11 @@ class Entropy {
             this.#removeFromEntropyList(entropyList, entropyListIndex);
         }
 
-        let entropyListIndex = max(gridTileEntropy - 2, 0);
+        let entropyListIndex = gridTileEntropy
         this.#entropysList[entropyListIndex].push(gridTileIndex);
     }
 
-    #check(gridTileIndex) {
+    getGridTileEntropy(gridTileIndex) {
         for (let i = 0; i < this.#entropysList.length; i++) {
             let entropyList = this.#entropysList[i];
             if (entropyList.length == 0) { continue }
@@ -79,7 +75,7 @@ class Entropy {
         entropyList.splice(entropyListIndex, 1);
     }
 
-    createNewEntropyList() {
-        this.#entropysList = Array.from({ length: this.#maxEntropy - 1 }, () => []);
+    createEntropyList() {
+        this.#entropysList = Array.from({ length: this.#maxEntropy }, () => []);
     }
 }

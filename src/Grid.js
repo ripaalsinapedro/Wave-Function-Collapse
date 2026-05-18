@@ -9,21 +9,22 @@ class Grid {
      * it means that the number stored in that grid tile,
      * is the index of the tile
      * If the grid tile is not collapsed,
-     * the value of the grid tile will be undefined
+     * the value of the grid tile will be 0
      * 
      * @param {Number} rows the number of rows of the grid
      * @param {Number} cols the number of colums of the grid
      */
     constructor(rows, cols) {
-        this.#rows = rows;
-        this.#cols = cols;
-        this.createNewGrid(rows, cols);
+        this.createGrid(rows, cols);
     }
 
     get length() {
         return this.#grid.length;
     }
 
+    /** 
+     * Get a random tile index from the gird
+     */
     get randomGridTileIndex() {
         return int(random(this.#grid.length));
     }
@@ -117,10 +118,18 @@ class Grid {
         if (!this.validIndex(index)) { throw new RangeError("cannot acces grid value") }
     }
 
-    createNewGrid(newRows, newCols) {
+    /**
+     * Creates a new grid from a number of rows
+     * and cols
+     * The array is a Uint8Array
+     * 
+     * @param {Number} newRows the number of rows
+     * @param {Number} newCols the number of cols
+     */
+    createGrid(newRows, newCols) {
         this.#rows = newRows;
         this.#cols = newCols;
 
-        this.#grid = Array.from({ length: newRows * newCols });
+        this.#grid = new Uint8Array(this.#rows * this.#cols);
     }
 }

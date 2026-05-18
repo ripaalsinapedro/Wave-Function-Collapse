@@ -4,18 +4,39 @@ class WaveFunctionCollapse {
     #entropy;
 
     #collapsedGridTilesIndex;
+    #collapsedGridTilesIndexCounter;
 
     /**
-     * @param {Number} cols 
-     * @param {Number} rows
-     * @param {Tiles} tiles  
+     * The wave function collapse class
+     * is the main class for the algorithm.
+     * It stores the grid, the enropy class,
+     * and the tiles.
+     * Its main job its to collapse every tile grid
+     * until the grid is full, choosing
+     * the grid tile with the lowest entropy each time
+     * to do so.
+     * 
+     * @param {Number} cols the number of cols
+     * @param {Number} rows the numeber of rows
+     * @param {Tiles} tiles  a tiles object
      */
     constructor(rows, cols, tiles) {
         this.#grid = new Grid(rows, cols, tiles);
+        this.#entropy = new Entropy(rows, cols, tiles.tilesLenght);
         this.#tiles = tiles;
-        this.#entropy = new Entropy(tiles.tilesLenght);
 
-        this.#collapsedGridTilesIndex = new Array();
+        this.#createCollapsedGridTlesIndexList(rows, cols);
+    }
+
+    #createCollapsedGridTlesIndexList(rows, cols) {
+        this.#collapsedGridTilesIndexCounter = 0;
+        this.#collapsedGridTilesIndex = new Uint32Array(rows * cols);
+    }
+
+    reset(newRows, newCols) {
+        this.#createCollapsedGridTlesIndexList(newRows, newCols);
+        this.#entropy.createEntropyList();
+        this.#grid.createGrid(newRows, newCols);
     }
 
     collapse() {
@@ -29,6 +50,7 @@ class WaveFunctionCollapse {
 
         this.#addCollapsedGridTilesIndex(gridTileIndex);
         this.#updateNeighbours(gridTileNeighboursIndex);
+
     }
 
     /**
@@ -38,10 +60,8 @@ class WaveFunctionCollapse {
      * @returns  a grit tile index
      */
     #getGridTileIndex() {
-        let gridTileIndex = this.#entropy.getLowestEntropyGridTileIndex();
-        if (gridTileIndex == undefined) { gridTileIndex = this.#grid.randomGridTileIndex }
-
-        return gridTileIndex;
+        if (this.#collapsedGridTilesIndexCounter == 0) { return this.#grid.randomGridTileIndex }
+        return this.#entropy.getLowestEntropyGridTileIndex();
     }
 
     /**
@@ -71,28 +91,23 @@ class WaveFunctionCollapse {
 
             let newGridTileNeighboursIndex = this.#grid.getNeighboursIndex(gridTileNeighbourIndex);
             let posibleNeighbourTiles = this.#getPosibleTiles(newGridTileNeighboursIndex);
-            let neighbourEntropy = posibleNeighbourTiles.length;
+            let neighbourEntropy = posibleNeighbourTiles.length - 1;
 
             this.#entropy.updateGridTileEntropy(gridTileNeighbourIndex, neighbourEntropy);
         }
     }
 
     #addCollapsedGridTilesIndex(gridTileIndex) {
-        if (!this.#collapsed(gridTileIndex)) { this.#collapsedGridTilesIndex.push(gridTileIndex) }
+        this.#collapsedGridTilesIndex[this.#collapsedGridTilesIndexCounter] = gridTileIndex;
+        this.#collapsedGridTilesIndexCounter++;
     }
 
     #collapsed(gridTileIndex) {
-        return this.#collapsedGridTilesIndex.some((i) => i == gridTileIndex);
+        return this.#grid.getGridTileValue(gridTileIndex) != 0;
     }
 
     notFilled() {
-        return this.#collapsedGridTilesIndex.length < this.#grid.length;
-    }
-
-    reset(newRows, newCols) {
-        this.#collapsedGridTilesIndex = new Array();
-        this.#entropy.createNewEntropyList();
-        this.#grid.createNewGrid(newRows, newCols);
+        return this.#collapsedGridTilesIndexCounter < this.#grid.length;
     }
 
 
@@ -103,35 +118,29 @@ class WaveFunctionCollapse {
         textSize((resX + resY) / 10);
         fill(200);
 
-        for (let i = 0; i < this.#collapsedGridTilesIndex.length; i++) {
-            let gridTileIndex = this.#collapsedGridTilesIndex[i];
-            let tileIndex = this.#grid.getGridTileValue(gridTileIndex);
-            let tileImg = this.#tiles.tilesObj[tileIndex];
+        for (let i = 0; i < this.#grid.length; i++) {
+            let gridTileIndex = i;
 
             let x = gridTileIndex % this.#grid.rows;
             let y = Math.floor(gridTileIndex / this.#grid.rows);
 
-            image(tileImg, x * resX, y * resY, resX, resY);
-            if (displayGridTilesIndex) {
-                text(str(gridTileIndex), x * resX + resX / 2, y * resY + resY / 2, resX, resY);
+            if (this.#collapsed(gridTileIndex)) {
+                let tileIndex = this.#grid.getGridTileValue(gridTileIndex) - 1;
+                let tileImg = this.#tiles.tilesObj[tileIndex];
+
+                image(tileImg, x * resX, y * resY, resX, resY);
             }
-        }
 
-        let entropyGridTileIndexList = [];
-        if (displayEntropyGridTile) { entropyGridTileIndexList = this.#entropy.entropyList }
+            let entropy;
+            if (displayEntropyGridTile) {
+                entropy = this.#entropy.getGridTileEntropy(gridTileIndex);
+                if (entropy) {
+                    text(str(entropy[1] + 2), x * resX + resX / 2, y * resY + resY / 2, resX, resY);
+                }
+            }
 
-        for (let i = 0; i < entropyGridTileIndexList.length; i++) {
-            let entropyGridTileIndexSubList = entropyGridTileIndexList[i];
-            if (entropyGridTileIndexSubList.length == 0) { continue }
-
-            for (let j = 0; j < entropyGridTileIndexSubList.length; j++) {
-                let entropyGridTileIndex = entropyGridTileIndexSubList[j];
-                let entropy = i;
-
-                let x = entropyGridTileIndex % this.#grid.rows;
-                let y = Math.floor(entropyGridTileIndex / this.#grid.rows);
-
-                text(str(entropy + 2), x * resX + resX / 2, y * resY + resY / 2, resX, resY);
+            if (displayGridTilesIndex && !entropy) {
+                text(str(gridTileIndex), x * resX + resX / 2, y * resY + resY / 2, resX, resY);
             }
         }
     }

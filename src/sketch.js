@@ -35,7 +35,9 @@ function draw() {
     WFC.reset(rows, cols);
   });
 
+
   if (WFC.notFilled()) {
+    a = 0;
     WFC.collapse();
   }
 }

@@ -4,6 +4,7 @@ class Tiles {
     #tilesRuleBook;
 
     #len;
+    #defaultPosibleTiles;
 
     /**
      * The tiles class creates 3 main arrays,
@@ -56,7 +57,9 @@ class Tiles {
         ]
 
         this.#len = this.#tilesObj.length;
-        this.#tilesRuleBook = this.#createTilesRuleBook();
+        this.#defaultPosibleTiles = Array.from({ length: this.#len }, (_, i) => i + 1);
+        this.#tilesRuleBook = Array.from({ length: this.#len * 4 });
+        this.#createTilesRuleBook();
     }
 
     get tilesObj() {
@@ -71,20 +74,19 @@ class Tiles {
      * The rule book contains the tiles that a tile can have as neighbour
      * So the first four items in the array, are the four neighbours
      * for the fist tile, and the order is
+     * Tiles are count from 1, the tile 0 does not exist
      * Up, Right, Down, Left
      * 
      * Ej. 
-     * ruleBook = [[0, 1], [2, 4], [0], [1, 3]]
+     * ruleBook = [[1, 4], [2, 4], [5], [1, 3]]
      * 
-     * In the example, the tile 0, can have
-     * the tiles 0 and 1 abvove, and,
+     * In the example, the tile 1, can have
+     * the tiles 1 and 4 abvove, and,
      * the tiles 2 and 4 to the right
      * 
      * @returns the rule book array
      */
     #createTilesRuleBook() {
-        let ruleBook = [];
-
         for (let i = 0; i < this.#len; i++) {
             let tileSides = this.#tilesSides[i];
 
@@ -92,11 +94,9 @@ class Tiles {
                 let compatibleList = this.#createCompatibleList(i, j);
                 this.#validateCompatibleList(compatibleList);
 
-                ruleBook.push(compatibleList);
+                this.#tilesRuleBook[(i * tileSides.length) + j] = compatibleList;
             }
         }
-
-        return ruleBook;
     }
 
     /**
@@ -117,7 +117,7 @@ class Tiles {
             let opositeSideIndex = this.#getOpositeSideIndex(sideIndex);
             let secondTileSide = this.#tilesSides[i][opositeSideIndex];
 
-            if (tileSide == secondTileSide) { list.push(i) }
+            if (tileSide == secondTileSide) { list.push(i + 1) }    // the +1 is to avoid having a 0 tile
         }
 
         return list;
@@ -128,6 +128,13 @@ class Tiles {
         if (sideIndex > this.#tilesSides[tileIndex].length) { throw new RangeError("The side index is not valid") }
     }
 
+    /**
+     * This array cant be empty, because
+     * that means that a tile cant
+     * have any neihbours
+     * 
+     * @param {Array} compatibleList the array of compatilbe tiles
+     */
     #validateCompatibleList(compatibleList) {
         if (compatibleList.length == 0) {
             throw new Error("a tile cant have no posible tiles to be neighbour with")
@@ -156,64 +163,53 @@ class Tiles {
      * @param {Array} tiles an array of tiles index
      */
     getPosibleTiles(tilesIndex) {
-        if (this.#noCollapsedTiles(tilesIndex)) { return Array.from({ length: this.#len }, (_, i) => i) }     //can be any tile
+        if (this.#noCollapsed(tilesIndex)) { return this.#defaultPosibleTiles }
 
         let tilesRuleBook = this.#getTilesRuleBook(tilesIndex);
-        let filterTilesRuleBook = this.#getFilterTilesRuleBook(tilesRuleBook);
-        let posibleTiles = this.#getIntersectionOfArrays(filterTilesRuleBook);
+        let posibleTiles = this.#getIntersectionOfArrays(tilesRuleBook);
 
         return posibleTiles;
     }
 
     /**
-     * This function check if a grid tile have no collapsed neighbours
+     * Cheks if an array have all 0
      * 
      * @param {Array} tilesIndex the tiles index
-     * @returns true if none of the tiles are collapsed
+     * @returns true if all tiles in tiles index are 0 or undefined
      */
-    #noCollapsedTiles(tilesIndex) {
-        return tilesIndex.every((tileIndex) => tileIndex == undefined);
+    #noCollapsed(tilesIndex) {
+        for (let i = 0; i < tilesIndex.length; i++) {
+            if (tilesIndex[i]) { return false }
+        }
+
+        return true;
     }
 
     /**
      * This function get an array of tiles index
      * and map it to its rule book 
+     * Any 0 tile index will be ignored
      * 
-     * Ej. tile index [0, 4, undefined, 1]
-     *     tiles rule book [[0, 1], [2, 4, 5], undefined, [1]]
+     * Ej. tile index [0, 4, 0, 1]
+     *     tiles rule book [0, [2, 4, 5], 0, [1]]
      * 
      * @param {Array} tiles an array of tiles index
      * @returns an array with rule books
      */
     #getTilesRuleBook(tilesIndex) {
-        let tilesRuleBook = new Array(tilesIndex.length);
-
         for (let i = 0; i < tilesIndex.length; i++) {
-            let tileIndex = tilesIndex[i];
-            if (tileIndex == undefined) { continue }    // a tile can be not collapsed yet 
+            let tileIndex = tilesIndex[i] - 1;
+            if (tileIndex == -1 || isNaN(tileIndex)) { continue }    // a tile can be not collapsed yet 
 
             let sideIndex = i;
             let opositeSideIndex = this.#getOpositeSideIndex(sideIndex);
 
             let tileSideRuleBookindex = this.#getRuleBook(tileIndex, opositeSideIndex);
 
-            tilesRuleBook[i] = tileSideRuleBookindex;
+            tilesIndex[i] = tileSideRuleBookindex;
         }
 
-        return tilesRuleBook;
-    }
-
-    /**
-     * Because we dont need the position to be mantain
-     * in the tiles rule book array,
-     * beacuse we dont care anymore wich neighbour is wich,
-     * we filter the not collapsed neighbours
-     * 
-     * @param {Array} tilesRuleBook the tiles rule book
-     * @returns a filter array of rule books
-     */
-    #getFilterTilesRuleBook(tilesRuleBook) {
-        return tilesRuleBook.filter((ruleBook) => ruleBook != undefined);
+        return tilesIndex;
     }
 
     /**
@@ -222,10 +218,11 @@ class Tiles {
      * @returns an array with the elemtns share by all the arrays
      */
     #getIntersectionOfArrays(tilesRuleBook) {
-        let intersectionArray = tilesRuleBook[0];
+        let intersectionArray = this.#defaultPosibleTiles;
 
-        for (let i = 1; i < tilesRuleBook.length; i++) {
+        for (let i = 0; i < tilesRuleBook.length; i++) {
             let tileRuleBook = tilesRuleBook[i];
+            if (!tileRuleBook) { continue }
             intersectionArray = this.#filterArrays(intersectionArray, tileRuleBook);
         }
 
@@ -239,18 +236,8 @@ class Tiles {
      * @returns an array with the elements share by the two arrays
      */
     #filterArrays(arr1, arr2) {
-        let filterArray = [];
-
-        for (let i = 0; i < arr1.length; i++) {
-            const element = arr1[i];
-            for (let j = 0; j < arr2.length; j++) {
-                const element2 = arr2[j];
-
-                if (element == element2) { filterArray.push(element) }
-            }
-        }
-
-        return filterArray;
+        const set2 = new Set(arr2);
+        return arr1.filter(element => set2.has(element));
     }
 
     /**
